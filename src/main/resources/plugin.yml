@@ -5,3 +5,13 @@ api-version: 1.16
 authors: [ knkiss, Dnkiss ]
 description: Game plugin for mcxyhj
 website: mcxyhj.cn
+
+commands:
+  game:
+    description: 关于游戏的指令
+
+permissions:
+  mcxyhj.game.admin:
+    description: commands about plugin
+    children:
+      mcxyhj.game.debug: true
