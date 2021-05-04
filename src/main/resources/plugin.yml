@@ -1,0 +1,7 @@
+name: McXyhjGame
+version: ${project.version}
+main: mcxyhj.cn.knkiss.McXyhjGame
+api-version: 1.16
+authors: [ knkiss, Dnkiss ]
+description: Game plugin for mcxyhj
+website: mcxyhj.cn
