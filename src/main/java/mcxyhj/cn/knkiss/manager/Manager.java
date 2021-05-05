@@ -1,10 +1,11 @@
 package mcxyhj.cn.knkiss.manager;
 
 import mcxyhj.cn.knkiss.game.Game;
+import mcxyhj.cn.knkiss.game.SplatoonGame;
 import mcxyhj.cn.knkiss.game.SwapLocationGame;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
+import mcxyhj.cn.knkiss.room.SplatoonRoom;
+import mcxyhj.cn.knkiss.room.SwapLocationRoom;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -24,12 +25,16 @@ import java.util.*;
 public class Manager implements Listener {
 	public static JavaPlugin plugin;
 	public static HashMap<String, Game> gameMap = new HashMap<>();//游戏名对应游戏
+	public static World mainWorld = Bukkit.getWorld("world");
+	public static Location spawnPoint = new Location(mainWorld, -120, 64, -268);
 	
 	public static void onEnable(){
 		plugin.getLogger().info("onEnable");
 		systemInit();
 		gameInit();
 		ManagerGui.guiInit();
+		worldInit();
+		
 	}
 	
 	public static void onDisable(){
@@ -42,7 +47,7 @@ public class Manager implements Listener {
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			Bukkit.getScheduler().runTask(plugin, () -> {
 				player.setGameMode(GameMode.SURVIVAL);
-				player.teleport(new Location(Bukkit.getWorld("world"), -120, 64, -268));
+				player.teleport(spawnPoint);
 			});
 		}
 	}
@@ -55,12 +60,16 @@ public class Manager implements Listener {
 	
 	private static void gameInit(){
 		gameMap.put("swaplocation", new SwapLocationGame("§b交换位置大冒险",60,2,10));
+		gameMap.put("splatoon", new SplatoonGame("§b涂鸦大冒险",60,2,10));
 	}
 	
 	private static void barClear(){
 		gameMap.forEach((s, game) -> {
 			game.waitBar.removeAll();
-			game.roomList.forEach(room -> room.playBar.removeAll());
+			game.roomList.forEach(room -> {
+				room.playBar.removeAll();
+				room.teamBar.forEach((s1, bossBar) -> bossBar.removeAll());
+			});
 		});
 	}
 	
@@ -78,5 +87,13 @@ public class Manager implements Listener {
 			if(entry.getValue().inGame(player.getName()))has = true;
 		}
 		return has;
+	}
+	
+	public static void worldInit(){
+		Bukkit.getScheduler().runTask(Manager.plugin,()->{
+			SwapLocationRoom.slgWorld = Bukkit.createWorld(new WorldCreator("SwapLocation").seed(new Date().getTime()));
+			SplatoonRoom.pltWorld = Bukkit.createWorld(new WorldCreator("Splatoon").seed(new Date().getTime()));
+			mainWorld.setDifficulty(Difficulty.PEACEFUL);
+		});
 	}
 }

@@ -1,5 +1,6 @@
 package mcxyhj.cn.knkiss.room;
 
+import mcxyhj.cn.knkiss.game.Game;
 import mcxyhj.cn.knkiss.manager.Manager;
 import mcxyhj.cn.knkiss.manager.ManagerTimer;
 import org.bukkit.*;
@@ -14,12 +15,10 @@ import java.util.*;
 public class SwapLocationRoom extends Room  {
 	public int changeTime = 180;
 	
-	public static boolean state = false;
 	public static World slgWorld = Bukkit.getWorld("SwapLocation");
-	public static World mainWorld = Bukkit.getWorld("world");
 	
-	public SwapLocationRoom(List<String> playerList) {
-		super(playerList);
+	public SwapLocationRoom(Game game, List<String> playerList) {
+		super(game,playerList);
 		
 		//地图初始化 TODO 相同内地图
 		Queue<Player> playerQueue = new LinkedList<>();
@@ -27,10 +26,8 @@ public class SwapLocationRoom extends Room  {
 			Player player = Bukkit.getPlayerExact(s);
 			if (player!=null) playerQueue.offer(player);
 		});
-		state = true;
 		
 		Bukkit.getScheduler().runTask(Manager.plugin,()->{
-			slgWorld = Bukkit.createWorld(new WorldCreator("SwapLocation").seed(new Date().getTime()));
 			assert slgWorld != null;
 			slgWorld.setTime(0);
 			
@@ -75,7 +72,6 @@ public class SwapLocationRoom extends Room  {
 	
 	@Override
 	public void finish() {
-		Bukkit.getScheduler().runTask(Manager.plugin,()-> mainWorld = Bukkit.createWorld(new WorldCreator("world")));
 		String winner = playerList.get(0);
 		quitList.add(winner);
 		quitList.forEach(s -> {
@@ -84,7 +80,7 @@ public class SwapLocationRoom extends Room  {
 				p.sendTitle(winner,"§6获胜！",20,100,20);
 				Bukkit.getScheduler().runTask(Manager.plugin,()->{
 					p.setGameMode(GameMode.SURVIVAL);
-					p.teleport(new Location(mainWorld,-120,64,-268));
+					p.teleport(Manager.spawnPoint);
 				});
 				
 			}
@@ -94,13 +90,17 @@ public class SwapLocationRoom extends Room  {
 	}
 	
 	@Override
-	public boolean hasPlayer(String name) {
+	public boolean inGame(String name) {//离开玩家和失败玩家
+		return !quitList.contains(name);
+	}
+	
+	@Override
+	public boolean hasPlayer(String name) {//在线玩家
 		return playerList.contains(name);
 	}
 	
 	@Override
 	public boolean quit(String name) {
-		if(isFinish())return false;
 		if(playerList.contains(name)){
 			playerList.remove(name);
 			quitList.add(name);
@@ -110,6 +110,11 @@ public class SwapLocationRoom extends Room  {
 			return true;
 		}
 		return false;
+	}
+	
+	@Override
+	public void reConnect(Player player) {
+		player.sendMessage("交换位置大冒险无法重连，这局游戏结束后你将不再收到此提示");
 	}
 	
 	@Override

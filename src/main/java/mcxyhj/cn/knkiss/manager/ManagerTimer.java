@@ -19,6 +19,6 @@ public class ManagerTimer {
 				new ArrayList<>(gameTime).forEach(Game::timer);
 				new ArrayList<>(roomTime).forEach(Room::timer);
 			}
-		}.runTaskTimerAsynchronously(Manager.plugin,0L,20L);
+		}.runTaskTimerAsynchronously(Manager.plugin,0L,4L);
 	}
 }

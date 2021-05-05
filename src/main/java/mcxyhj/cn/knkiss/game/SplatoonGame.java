@@ -1,31 +1,29 @@
 package mcxyhj.cn.knkiss.game;
 
 import mcxyhj.cn.knkiss.manager.Manager;
-import mcxyhj.cn.knkiss.room.SwapLocationRoom;
+import mcxyhj.cn.knkiss.room.SplatoonRoom;
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.PlayerDeathEvent;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-public class SwapLocationGame extends Game implements Listener {
-	
-	public SwapLocationGame(String name, int startTimeMax, int playerMin, int playerMax) {
+public class SplatoonGame extends Game implements Listener {
+	public SplatoonGame(String name, int startTimeMax, int playerMin, int playerMax) {
 		super(name, startTimeMax, playerMin, playerMax);
-		initIcon(Material.ENDER_EYE,new ArrayList<>());
+		initIcon(Material.SNOWBALL,new ArrayList<>());
 		Bukkit.getPluginManager().registerEvents(this, Manager.plugin);
-		this.canQuit = true;
+		this.canQuit = false;
 	}
 	
 	@Override
 	public void start() {
 		while(waitList.size() >= playerMin){
 			int playerNum = Math.min(playerMax,waitList.size());
+			if(playerNum % 2 != 0) playerNum-=1;//这个游戏仅允许偶数个玩家进入，公平对抗
+			
 			LinkedList<String> playerList = new LinkedList<>();
 			for(int i=0;i<playerNum;i++){
 				String name = waitList.removeFirst();
@@ -36,16 +34,7 @@ public class SwapLocationGame extends Game implements Listener {
 					waitBar.removePlayer(p);
 				}
 			}
-			roomList.add(new SwapLocationRoom(this,playerList));
-		}
-	}
-	
-	@EventHandler
-	public void onPlayerDeath(PlayerDeathEvent e){
-		Player p = e.getEntity();
-		if(inGame(p.getName())){
-			p.setGameMode(GameMode.SPECTATOR);
-			quit(p.getName());
+			roomList.add(new SplatoonRoom(this,playerList));
 		}
 	}
 }

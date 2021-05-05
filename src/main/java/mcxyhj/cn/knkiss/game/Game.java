@@ -27,6 +27,7 @@ public abstract class Game {
 	
 	public int playerMin; //最少玩家数量
 	public int playerMax; //最大玩家数量
+	public boolean canQuit;
 	
 	public ItemStack icon = new ItemStack(Material.STONE,1);
 	
@@ -39,7 +40,7 @@ public abstract class Game {
 		waitBar = Bukkit.createBossBar(name+" §f请等待其他玩家加入", BarColor.RED, BarStyle.SOLID);
 	}
 	
-	void initIcon(Material material){
+	void initIcon(Material material,List<String> addLore){
 		icon = new ItemStack(material,1);
 		ItemMeta im = icon.getItemMeta();
 		assert im != null;
@@ -48,30 +49,13 @@ public abstract class Game {
 		
 		loreList.add("§8单局最低玩家数量: §7§l"+playerMin+"§8 人");
 		loreList.add("§8单局最高玩家数量: §7§l"+playerMax+"§8 人");
-		
+		loreList.addAll(addLore);
 		
 		im.setLore(loreList);
 		icon.setItemMeta(im);
 	}
 	
-	public void start(){
-		while(waitList.size() >= playerMin){
-			int playerNum = Math.min(playerMax,waitList.size());
-			LinkedList<String> playerList = new LinkedList<>();
-			for(int i=0;i<playerNum;i++){
-				String name = waitList.removeFirst();
-				playerList.offer(name);
-				Player p = Bukkit.getPlayerExact(name);
-				if(p!=null) {
-					p.sendTitle("§6游戏正式开始","",10,30,0);
-					waitBar.removePlayer(p);
-				}
-			}
-			newRoom(playerList);
-		}
-	}
-	
-	public abstract void newRoom(List<String> playerList);
+	public abstract void start();
 	
 	public void join(String name){
 		//玩家进入后准备开始
@@ -109,7 +93,7 @@ public abstract class Game {
 		}
 	}
 	
-	public boolean hasPlayer(String name){
+	public boolean hasPlayer(String name){//包含等待
 		boolean has = waitList.contains(name);
 		for(Room room: roomList){
 			if (room.hasPlayer(name)) has = true;
@@ -117,7 +101,7 @@ public abstract class Game {
 		return has;
 	}
 	
-	public boolean inGame(String name){
+	public boolean inGame(String name){//不包含等待
 		boolean has = false;
 		for(Room room: roomList){
 			if (room.hasPlayer(name)) has = true;
@@ -139,5 +123,9 @@ public abstract class Game {
 			waitBar.setColor(BarColor.RED);
 			ManagerTimer.gameTime.remove(this);
 		}
+	}
+	
+	public void removeRoom(Room room){
+		roomList.remove(room);
 	}
 }

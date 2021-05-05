@@ -29,13 +29,28 @@ public class ManagerCommand implements CommandExecutor {
 			if(args[0].equalsIgnoreCase("join")){
 				if(args.length >= 2) {
 					if(Manager.gameMap.containsKey(args[1].toLowerCase())){
-						Manager.gameMap.get(args[1].toLowerCase()).join(sender.getName());
+						if(!(sender instanceof Player)){
+							if(args.length>=3){
+								for(int i=0;i<Integer.parseInt(args[2]);i++){
+									Manager.gameMap.get(args[1].toLowerCase()).join("test"+i);
+								}
+							}else{
+								Manager.gameMap.get(args[1].toLowerCase()).join(sender.getName());
+							}
+							return true;
+						}
+						if(!Manager.hasPlayer((Player)sender)){
+							Manager.gameMap.get(args[1].toLowerCase()).join(sender.getName());
+						}
 					}
 				}
 			}
 			if(args[0].equalsIgnoreCase("quit")){
 				Manager.gameMap.forEach((s, game) -> {
-					if(game.hasPlayer(sender.getName())) game.quit(sender.getName());
+					if(game.hasPlayer(sender.getName())){
+						if(!game.inGame(sender.getName()))game.quit(sender.getName()); //等待队列直接离开
+						else if(game.canQuit)game.quit(sender.getName()); //游戏里且可退出则离开
+					}
 				});
 			}
 		}

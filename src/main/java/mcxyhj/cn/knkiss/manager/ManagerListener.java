@@ -10,17 +10,32 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class ManagerListener implements Listener {
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e){
-		e.getPlayer().setGameMode(GameMode.SURVIVAL);
-		e.getPlayer().teleport(new Location(Bukkit.getWorld("world"),-120,64,-268));
-		e.getPlayer().setBedSpawnLocation(new Location(Bukkit.getWorld("world"),-120,64,-268),true);
+		AtomicBoolean reConnect = new AtomicBoolean(false);
+		Manager.gameMap.forEach((s, game) -> {
+			if(game.inGame(e.getPlayer().getName())){
+				game.roomList.forEach(room -> {
+					if(!room.inGame(e.getPlayer().getName())){
+						room.reConnect(e.getPlayer());
+						reConnect.set(true);
+					}
+				});
+			}
+		});
+		if(!reConnect.get()){
+			e.getPlayer().setGameMode(GameMode.SURVIVAL);
+			e.getPlayer().teleport(Manager.spawnPoint);
+			e.getPlayer().setBedSpawnLocation(Manager.spawnPoint,true);
+		}
 	}
 	
 	@EventHandler
 	public void onPlayerRespawn(PlayerRespawnEvent e){
-		e.getPlayer().teleport(new Location(Bukkit.getWorld("world"),-120,64,-268));
+		e.getPlayer().teleport(Manager.spawnPoint);
 	}
 	
 	@EventHandler
@@ -42,7 +57,6 @@ public class ManagerListener implements Listener {
 		}else if(num==53){
 			p.performCommand("game quit");
 		}
-		p.closeInventory();
 	}
 	
 	@EventHandler
