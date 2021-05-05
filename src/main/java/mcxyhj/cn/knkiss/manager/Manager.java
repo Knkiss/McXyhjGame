@@ -5,6 +5,7 @@ import mcxyhj.cn.knkiss.game.SwapLocationGame;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -28,6 +29,7 @@ public class Manager implements Listener {
 		plugin.getLogger().info("onEnable");
 		systemInit();
 		gameInit();
+		ManagerGui.guiInit();
 	}
 	
 	public static void onDisable(){
@@ -37,12 +39,12 @@ public class Manager implements Listener {
 	
 	public static void onReload(){
 		plugin.getLogger().info("onReload");
-		Bukkit.getOnlinePlayers().forEach(player -> {
-			Bukkit.getScheduler().runTask(plugin,()->{
-				player.setGameMode(GameMode.SPECTATOR);
-				player.teleport(new Location(Bukkit.getWorld("world"),-26.5,80,-150));
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			Bukkit.getScheduler().runTask(plugin, () -> {
+				player.setGameMode(GameMode.SURVIVAL);
+				player.teleport(new Location(Bukkit.getWorld("world"), -120, 64, -268));
 			});
-		});
+		}
 	}
 	
 	private static void systemInit(){
@@ -52,15 +54,29 @@ public class Manager implements Listener {
 	}
 	
 	private static void gameInit(){
-		gameMap.put("SwapLocation", new SwapLocationGame("交换位置大冒险",60,2,10));
+		gameMap.put("swaplocation", new SwapLocationGame("§b交换位置大冒险",60,2,10));
 	}
 	
 	private static void barClear(){
 		gameMap.forEach((s, game) -> {
 			game.waitBar.removeAll();
-			game.roomList.forEach(room -> {
-				room.playBar.removeAll();
-			});
+			game.roomList.forEach(room -> room.playBar.removeAll());
 		});
+	}
+	
+	public static boolean hasPlayer(Player player){
+		boolean has = false;
+		for (Map.Entry<String, Game> entry : gameMap.entrySet()) {
+			if(entry.getValue().hasPlayer(player.getName()))has = true;
+		}
+		return has;
+	}
+	
+	public static boolean inGame(Player player){
+		boolean has = false;
+		for (Map.Entry<String, Game> entry : gameMap.entrySet()) {
+			if(entry.getValue().inGame(player.getName()))has = true;
+		}
+		return has;
 	}
 }

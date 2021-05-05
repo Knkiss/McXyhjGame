@@ -15,7 +15,7 @@ public class SwapLocationRoom extends Room  {
 	public int changeTime = 180;
 	
 	public static boolean state = false;
-	public static World slgWorld = Bukkit.getWorld("slg");
+	public static World slgWorld = Bukkit.getWorld("SwapLocation");
 	public static World mainWorld = Bukkit.getWorld("world");
 	
 	public SwapLocationRoom(List<String> playerList) {
@@ -30,7 +30,7 @@ public class SwapLocationRoom extends Room  {
 		state = true;
 		
 		Bukkit.getScheduler().runTask(Manager.plugin,()->{
-			slgWorld = Bukkit.createWorld(new WorldCreator("slg").seed(new Date().getTime()));
+			slgWorld = Bukkit.createWorld(new WorldCreator("SwapLocation").seed(new Date().getTime()));
 			assert slgWorld != null;
 			slgWorld.setTime(0);
 			
@@ -75,18 +75,16 @@ public class SwapLocationRoom extends Room  {
 	
 	@Override
 	public void finish() {
-		Bukkit.getScheduler().runTask(Manager.plugin,()->{
-			mainWorld = Bukkit.createWorld(new WorldCreator("world"));
-		});
+		Bukkit.getScheduler().runTask(Manager.plugin,()-> mainWorld = Bukkit.createWorld(new WorldCreator("world")));
 		String winner = playerList.get(0);
 		quitList.add(winner);
 		quitList.forEach(s -> {
 			Player p = Bukkit.getPlayerExact(s);
 			if (p!=null){
-				p.sendTitle(winner,"获胜！",20,100,20);
+				p.sendTitle(winner,"§6获胜！",20,100,20);
 				Bukkit.getScheduler().runTask(Manager.plugin,()->{
-					p.setGameMode(GameMode.SPECTATOR);
-					p.teleport(new Location(mainWorld,-26.5,80,-150));
+					p.setGameMode(GameMode.SURVIVAL);
+					p.teleport(new Location(mainWorld,-120,64,-268));
 				});
 				
 			}
@@ -118,7 +116,7 @@ public class SwapLocationRoom extends Room  {
 	public void timer() {
 		changeTime--;
 		playBar.setProgress((changeTime+1) / 180.0);
-		playBar.setTitle("下一次交换:"+changeTime+"秒  存活玩家:"+playerList.size()+"人");
+		playBar.setTitle("§f下一次交换:§6"+changeTime+"§f秒  存活玩家:§6"+playerList.size()+"§f人");
 		if(changeTime==0){
 			changeTime = 180;
 			playBar.setColor(BarColor.GREEN);
@@ -140,7 +138,6 @@ public class SwapLocationRoom extends Room  {
 		});
 		
 		List<Location> lastLocation = new ArrayList<>();
-		Location l = new Location(slgWorld,0,0,0);
 		for(Player p : playerQueue) lastLocation.add(p.getLocation());
 		Random rand = new Random();
 		List<Location> randomLocation = new ArrayList<>(lastLocation);
@@ -167,7 +164,6 @@ public class SwapLocationRoom extends Room  {
 				p.teleport(randomLocation.get(i));
 				i++;
 			}
-		
 		});
 	}
 }

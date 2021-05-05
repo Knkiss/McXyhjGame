@@ -3,10 +3,13 @@ package mcxyhj.cn.knkiss.game;
 import mcxyhj.cn.knkiss.manager.ManagerTimer;
 import mcxyhj.cn.knkiss.room.Room;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -25,13 +28,30 @@ public abstract class Game {
 	public int playerMin; //最少玩家数量
 	public int playerMax; //最大玩家数量
 	
+	public ItemStack icon = new ItemStack(Material.STONE,1);
+	
 	public Game(String name,int startTimeMax,int playerMin,int playerMax){
 		this.name = name;
 		this.startTimeMax = startTimeMax;
 		this.startTime = startTimeMax;
 		this.playerMin = playerMin;
 		this.playerMax = playerMax;
-		waitBar = Bukkit.createBossBar(name+" 请等待其他玩家加入", BarColor.RED, BarStyle.SOLID);
+		waitBar = Bukkit.createBossBar(name+" §f请等待其他玩家加入", BarColor.RED, BarStyle.SOLID);
+	}
+	
+	void initIcon(Material material){
+		icon = new ItemStack(material,1);
+		ItemMeta im = icon.getItemMeta();
+		assert im != null;
+		im.setDisplayName(name);
+		List<String> loreList = new ArrayList<>();
+		
+		loreList.add("§8单局最低玩家数量: §7§l"+playerMin+"§8 人");
+		loreList.add("§8单局最高玩家数量: §7§l"+playerMax+"§8 人");
+		
+		
+		im.setLore(loreList);
+		icon.setItemMeta(im);
 	}
 	
 	public void start(){
@@ -43,7 +63,7 @@ public abstract class Game {
 				playerList.offer(name);
 				Player p = Bukkit.getPlayerExact(name);
 				if(p!=null) {
-					p.sendTitle("游戏正式开始","",10,30,0);
+					p.sendTitle("§6游戏正式开始","",10,30,0);
 					waitBar.removePlayer(p);
 				}
 			}
@@ -83,7 +103,7 @@ public abstract class Game {
 		if(waitList.size()<playerMin){
 			startTime = startTimeMax;
 			waitBar.setProgress(1.0);
-			waitBar.setTitle(this.name +" 请等待其他玩家加入");
+			waitBar.setTitle(this.name +" §f请等待其他玩家加入");
 			waitBar.setColor(BarColor.RED);
 			ManagerTimer.gameTime.remove(this);
 		}
@@ -97,17 +117,25 @@ public abstract class Game {
 		return has;
 	}
 	
+	public boolean inGame(String name){
+		boolean has = false;
+		for(Room room: roomList){
+			if (room.hasPlayer(name)) has = true;
+		}
+		return has;
+	}
+	
 	public void timer(){
 		if(startTime > 0){
 			startTime --;
 			waitBar.setProgress((1.0*startTime)/startTimeMax);
-			waitBar.setTitle("队列人数:"+waitList.size()+"  即将开始于:"+(startTime+1)+"秒");
+			waitBar.setTitle("§f队列人数:§6"+waitList.size()+"  §f即将开始于:§6"+(startTime+1)+"§f秒");
 			waitBar.setColor(BarColor.GREEN);
 		}else{
 			start();
 			startTime = startTimeMax;
 			waitBar.setProgress(1.0);
-			waitBar.setTitle(this.name +" 请等待其他玩家加入");
+			waitBar.setTitle(this.name +" §f请等待其他玩家加入");
 			waitBar.setColor(BarColor.RED);
 			ManagerTimer.gameTime.remove(this);
 		}

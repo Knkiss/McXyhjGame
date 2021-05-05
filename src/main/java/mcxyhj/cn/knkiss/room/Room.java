@@ -17,7 +17,7 @@ public abstract class Room{
 	
 	public Room(List<String> playerList){
 		this.playerList = playerList;
-		playBar = Bukkit.createBossBar("游戏正式开始", BarColor.GREEN, BarStyle.SOLID);
+		playBar = Bukkit.createBossBar("§6游戏正式开始", BarColor.GREEN, BarStyle.SOLID);
 		playerList.forEach(name -> {
 			Player p = Bukkit.getPlayerExact(name);
 			if(p!=null) playBar.addPlayer(p);
