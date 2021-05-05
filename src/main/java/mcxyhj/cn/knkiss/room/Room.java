@@ -37,5 +37,4 @@ public abstract class Room{
 	public abstract boolean quit(String name); //游戏结束返回true
 	public abstract void reConnect(Player player);
 	public abstract void timer();
-	
 }

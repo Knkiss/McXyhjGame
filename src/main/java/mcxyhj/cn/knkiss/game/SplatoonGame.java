@@ -4,8 +4,13 @@ import mcxyhj.cn.knkiss.manager.Manager;
 import mcxyhj.cn.knkiss.room.SplatoonRoom;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -36,5 +41,10 @@ public class SplatoonGame extends Game implements Listener {
 			}
 			roomList.add(new SplatoonRoom(this,playerList));
 		}
+	}
+	
+	@EventHandler
+	public void onBreak(BlockBreakEvent e){
+		if(inGame(e.getPlayer().getName()))e.setCancelled(true);
 	}
 }

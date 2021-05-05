@@ -20,7 +20,6 @@ public class SwapLocationRoom extends Room  {
 	public SwapLocationRoom(Game game, List<String> playerList) {
 		super(game,playerList);
 		
-		//地图初始化 TODO 相同内地图
 		Queue<Player> playerQueue = new LinkedList<>();
 		playerList.forEach(s -> {
 			Player player = Bukkit.getPlayerExact(s);
